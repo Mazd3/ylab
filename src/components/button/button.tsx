@@ -13,11 +13,15 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button: React.FC<ButtonProps> = ({
   children,
   className,
+  left,
+  right,
   ...props
 }) => {
   return (
     <button className={clsx(styles["button"], className)} {...props}>
+      {left && <>{left}</>}
       {children}
+      {right && <>{right}</>}
     </button>
   );
 };

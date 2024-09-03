@@ -21,38 +21,43 @@ export const SignInForm: React.FC<SignInFormProps> = ({ className }) => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isTouched, setIsTouched] = useState<Record<string, boolean>>({});
+  const [isSubmit, setIsSubmit] = useState(false);
 
   const validateFormData = useMemo(
-    () => (isSubmit: boolean) => {
-      for (const key in formData) {
-        if (isTouched[key] || isSubmit) {
-          if (!formData[key]) {
-            setErrors((prev) => ({
-              ...prev,
-              [key]: "Это поле обязательно для заполнения",
-            }));
-            setIsTouched((prev) => ({ ...prev, [key]: false }));
-            break;
-          }
-          if (key === "password" && formData.password.length < 8) {
-            setErrors((prev) => ({
-              ...prev,
-              password: "Пароль должен содержать не менее 8 символов",
-            }));
-            setIsTouched((prev) => ({ ...prev, password: false }));
-            break;
-          }
-          if (key === "email" && !emailRegex.test(formData.email)) {
-            setErrors((prev) => ({
-              ...prev,
-              email: "Некорректный адрес электронной почты",
-            }));
-            setIsTouched((prev) => ({ ...prev, email: false }));
-            break;
+    () =>
+      (isSubmit: boolean): boolean => {
+        let isValid = true;
+        for (const key in formData) {
+          if (isTouched[key] || isSubmit) {
+            if (key === "password" && formData.password.length < 8) {
+              setErrors((prev) => ({
+                ...prev,
+                password: "Пароль должен содержать не менее 8 символов",
+              }));
+              setIsTouched((prev) => ({ ...prev, password: false }));
+              isValid = false;
+            }
+            if (key === "email" && !emailRegex.test(formData.email)) {
+              setErrors((prev) => ({
+                ...prev,
+                email: "Некорректный адрес электронной почты",
+              }));
+              setIsTouched((prev) => ({ ...prev, email: false }));
+              isValid = false;
+            }
+            if (!formData[key]) {
+              setErrors((prev) => ({
+                ...prev,
+                [key]: "Это поле обязательно для заполнения",
+              }));
+              setIsTouched((prev) => ({ ...prev, [key]: false }));
+              isValid = false;
+            }
           }
         }
-      }
-    },
+
+        return isValid;
+      },
     [formData, isTouched]
   );
 
@@ -72,8 +77,20 @@ export const SignInForm: React.FC<SignInFormProps> = ({ className }) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    validateFormData(true);
+    const isValid = validateFormData(true);
+    if (!isValid) return;
     console.log(formData);
+    setIsSubmit(true);
+    setTimeout(async () => {
+      const response = await fetch("/api/sign-in", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      })
+        .then((res) => res.json())
+        .catch((error) => console.log(error));
+      setIsSubmit(false);
+      console.log(response);
+    }, 2000);
   };
 
   return (
@@ -95,7 +112,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ className }) => {
         placeholder="******************"
         error={errors.password}
       />
-      <Button>Войти</Button>
+      <Button>{isSubmit ? "Загрузка.." : "Войти"}</Button>
     </form>
   );
 };
