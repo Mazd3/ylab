@@ -1,0 +1,29 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --accent-color: #6b4acb;
+  --accent-color-darker: #5a3b9d;
+  --error-color: #e03131;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: block;
+  background-color: white;
+}
+
+#root {
+  height: 100dvh;
+  width: 100dvw;
+}
+
+a {
+  text-decoration: inherit;
+}
+
+button {
+  border: none;
+}
